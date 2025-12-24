@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Partner Registration | OneCall</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;font-family:Poppins}
+body{margin:0;background:#f4f6f8}
+.container{
+  max-width:550px;
+  background:#fff;
+  margin:30px auto;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1)
+}
+h2{text-align:center}
+label{font-weight:500;margin-top:12px;display:block}
+input,textarea{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border:1px solid #ccc;
+  border-radius:6px
+}
+.checkbox-group label{font-weight:400}
+button{
+  margin-top:20px;
+  width:100%;
+  padding:14px;
+  background:#0a7cff;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer
+}
+.success{
+  display:none;
+  color:green;
+  text-align:center;
+  margin-top:15px;
+  font-weight:600
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Partner Registration</h2>
+
+<form id="partnerForm">
+
+<label>Full Name</label>
+<input id="name" required>
+
+<label>Mobile Number</label>
+<input id="mobile" required>
+
+<label>City</label>
+<input id="city" required>
+
+<label>Select Services (multiple)</label>
+<div class="checkbox-group">
+  <label><input type="checkbox" value="Electrician"> Electrician</label>
+  <label><input type="checkbox" value="Plumber"> Plumber</label>
+  <label><input type="checkbox" value="Tile Work"> Tile Work</label>
+  <label><input type="checkbox" value="Civil Work"> Civil Work</label>
+  <label><input type="checkbox" value="Furniture Work"> Furniture Work</label>
+  <label><input type="checkbox" value="Painting"> Painting</label>
+</div>
+
+<label>Working Areas</label>
+<div class="checkbox-group">
+  <label><input type="checkbox" value="MP Nagar"> MP Nagar</label>
+  <label><input type="checkbox" value="Arera Colony"> Arera Colony</label>
+  <label><input type="checkbox" value="Old Bhopal"> Old Bhopal</label>
+  <label><input type="checkbox" value="Kolar Road"> Kolar Road</label>
+</div>
+
+<label>Upload Partner Photo</label>
+<input type="file" id="photo" accept="image/*" required>
+
+<label>Upload Aadhaar / ID Proof</label>
+<input type="file" id="aadhaar" accept="image/*,application/pdf" required>
+
+<button type="submit">Submit Registration</button>
+</form>
+
+<div class="success" id="successMsg">
+✅ Registration successful. Data saved.
+</div>
+</div>
+
+<!-- 🔥 FIREBASE (YOUR CODE + FIXED JS) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+
+/* ✅ TUMHARA FIREBASE CONFIG (UNCHANGED) */
+const firebaseConfig = {
+  apiKey: "AIzaSyCBWFoSbByYhp4iElmo01KB1NEBgaCWCbk",
+  authDomain: "onecall-partner-registration.firebaseapp.com",
+  projectId: "onecall-partner-registration",
+  storageBucket: "onecall-partner-registration.firebasestorage.app",
+  messagingSenderId: "158745534242",
+  appId: "1:158745534242:web:6ae3edc6be64e2f4634f7b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+document.getElementById("partnerForm").addEventListener("submit", async (e)=>{
+  e.preventDefault(); // ❌ Google Form kabhi open nahi hoga
+
+  const name = document.getElementById("name").value;
+  const mobile = document.getElementById("mobile").value;
+  const city = document.getElementById("city").value;
+
+  const services = [...document.querySelectorAll(".checkbox-group:nth-of-type(1) input:checked")].map(i=>i.value);
+  const areas = [...document.querySelectorAll(".checkbox-group:nth-of-type(2) input:checked")].map(i=>i.value);
+
+  const photoFile = document.getElementById("photo").files[0];
+  const aadhaarFile = document.getElementById("aadhaar").files[0];
+
+  const photoRef = ref(storage, "photos/" + Date.now() + "_" + photoFile.name);
+  const aadhaarRef = ref(storage, "aadhaar/" + Date.now() + "_" + aadhaarFile.name);
+
+  await uploadBytes(photoRef, photoFile);
+  await uploadBytes(aadhaarRef, aadhaarFile);
+
+  const photoURL = await getDownloadURL(photoRef);
+  const aadhaarURL = await getDownloadURL(aadhaarRef);
+
+  await addDoc(collection(db, "partners"), {
+    name,
+    mobile,
+    city,
+    services,
+    areas,
+    photoURL,
+    aadhaarURL,
+    createdAt: new Date()
+  });
+
+  document.getElementById("successMsg").style.display = "block";
+  e.target.reset();
+});
+</script>
+
+</body>
+</html>
