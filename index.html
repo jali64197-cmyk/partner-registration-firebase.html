@@ -103,12 +103,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebas
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
-/* ✅ TUMHARA FIREBASE CONFIG (UNCHANGED) */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyCBWFoSbByYhp4iElmo01KB1NEBgaCWCbk",
   authDomain: "onecall-partner-registration.firebaseapp.com",
   projectId: "onecall-partner-registration",
-  storageBucket: "onecall-partner-registration.appspot.com"
+  storageBucket: "onecall-partner-registration.appspot.com",
   messagingSenderId: "158745534242",
   appId: "1:158745534242:web:6ae3edc6be64e2f4634f7b"
 };
@@ -117,44 +117,68 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-document.getElementById("partnerForm").addEventListener("submit", async (e)=>{
-  e.preventDefault(); // ❌ Google Form kabhi open nahi hoga
+document.getElementById("partnerForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); // ⛔ Google Form / page reload band
 
-  const name = document.getElementById("name").value;
-  const mobile = document.getElementById("mobile").value;
-  const city = document.getElementById("city").value;
+  alert("Submit clicked – JS is running"); // 🔥 CONFIRM JS RUNNING
 
-  const services = [...document.querySelectorAll(".checkbox-group:nth-of-type(1) input:checked")].map(i=>i.value);
-  const areas = [...document.querySelectorAll(".checkbox-group:nth-of-type(2) input:checked")].map(i=>i.value);
+  try {
+    const name = document.getElementById("name").value;
+    const mobile = document.getElementById("mobile").value;
+    const city = document.getElementById("city").value;
 
-  const photoFile = document.getElementById("photo").files[0];
-  const aadhaarFile = document.getElementById("aadhaar").files[0];
+    const services = [...document.querySelectorAll(".checkbox-group:nth-of-type(1) input:checked")].map(i => i.value);
+    const areas = [...document.querySelectorAll(".checkbox-group:nth-of-type(2) input:checked")].map(i => i.value);
 
-  const photoRef = ref(storage, "photos/" + Date.now() + "_" + photoFile.name);
-  const aadhaarRef = ref(storage, "aadhaar/" + Date.now() + "_" + aadhaarFile.name);
+    if (!services.length || !areas.length) {
+      alert("Please select at least one service and one area");
+      return;
+    }
 
-  await uploadBytes(photoRef, photoFile);
-  await uploadBytes(aadhaarRef, aadhaarFile);
+    const photoInput = document.getElementById("photo");
+    const aadhaarInput = document.getElementById("aadhaar");
 
-  const photoURL = await getDownloadURL(photoRef);
-  const aadhaarURL = await getDownloadURL(aadhaarRef);
+    if (!photoInput.files[0] || !aadhaarInput.files[0]) {
+      alert("Please select photo and Aadhaar file");
+      return;
+    }
 
-  await addDoc(collection(db, "partners"), {
-    name,
-    mobile,
-    city,
-    services,
-    areas,
-    photoURL,
-    aadhaarURL,
-    createdAt: new Date()
-  });
+    alert("Uploading files…");
 
-  document.getElementById("successMsg").style.display = "block";
-  e.target.reset();
+    const photoRef = ref(storage, "photos/" + Date.now() + "_" + photoInput.files[0].name);
+    const aadhaarRef = ref(storage, "aadhaar/" + Date.now() + "_" + aadhaarInput.files[0].name);
+
+    await uploadBytes(photoRef, photoInput.files[0]);
+    await uploadBytes(aadhaarRef, aadhaarInput.files[0]);
+
+    const photoURL = await getDownloadURL(photoRef);
+    const aadhaarURL = await getDownloadURL(aadhaarRef);
+
+    alert("Saving data to Firestore…");
+
+    await addDoc(collection(db, "partners"), {
+      name,
+      mobile,
+      city,
+      services,
+      areas,
+      photoURL,
+      aadhaarURL,
+      createdAt: new Date()
+    });
+
+    alert("✅ DATA SAVED SUCCESSFULLY");
+    document.getElementById("successMsg").style.display = "block";
+    e.target.reset();
+
+  } catch (err) {
+    console.error("❌ ERROR:", err);
+    alert("ERROR: " + err.message);
+  }
 });
 </script>
 
 </body>
 </html>
+
 
