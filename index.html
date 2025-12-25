@@ -1,38 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
-  
 <meta charset="UTF-8">
-  <title>🔥 TEST ACTIVE 🔥</title>
 <title>Partner Registration | OneCall</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-<script>
-alert("PAGE JS LOADED");
-</script>
-  
+
 <style>
 *{box-sizing:border-box;font-family:Poppins}
 body{margin:0;background:#f4f6f8}
 .container{
-  max-width:550px;
+  max-width:520px;
   background:#fff;
   margin:30px auto;
   padding:25px;
   border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1)
+  box-shadow:0 10px 25px rgba(0,0,0,.1)
 }
 h2{text-align:center}
-label{font-weight:500;margin-top:12px;display:block}
-input,textarea{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border:1px solid #ccc;
-  border-radius:6px
-}
+label{display:block;margin-top:12px;font-weight:500}
+input{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:6px}
 .checkbox-group label{font-weight:400}
 button{
   margin-top:20px;
@@ -42,8 +31,7 @@ button{
   color:#fff;
   border:none;
   border-radius:8px;
-  font-size:16px;
-  cursor:pointer
+  font-size:16px
 }
 .success{
   display:none;
@@ -71,45 +59,37 @@ button{
 <label>City</label>
 <input id="city" required>
 
-<label>Select Services (multiple)</label>
+<label>Services (multiple)</label>
 <div class="checkbox-group">
-  <label><input type="checkbox" value="Electrician"> Electrician</label>
-  <label><input type="checkbox" value="Plumber"> Plumber</label>
-  <label><input type="checkbox" value="Tile Work"> Tile Work</label>
-  <label><input type="checkbox" value="Civil Work"> Civil Work</label>
-  <label><input type="checkbox" value="Furniture Work"> Furniture Work</label>
-  <label><input type="checkbox" value="Painting"> Painting</label>
+<label><input type="checkbox" value="Electrician"> Electrician</label>
+<label><input type="checkbox" value="Plumber"> Plumber</label>
+<label><input type="checkbox" value="Tile Work"> Tile Work</label>
+<label><input type="checkbox" value="Civil Work"> Civil Work</label>
+<label><input type="checkbox" value="Painting"> Painting</label>
 </div>
 
-<label>Working Areas</label>
-<div class="checkbox-group">
-  <label><input type="checkbox" value="MP Nagar"> MP Nagar</label>
-  <label><input type="checkbox" value="Arera Colony"> Arera Colony</label>
-  <label><input type="checkbox" value="Old Bhopal"> Old Bhopal</label>
-  <label><input type="checkbox" value="Kolar Road"> Kolar Road</label>
-</div>
-
-<label>Upload Partner Photo</label>
+<label>Upload Photo</label>
 <input type="file" id="photo" accept="image/*" required>
 
-<label>Upload Aadhaar / ID Proof</label>
+<label>Upload Aadhaar / ID</label>
 <input type="file" id="aadhaar" accept="image/*,application/pdf" required>
 
-<button type="submit">Submit Registration</button>
+<button type="submit">Submit</button>
 </form>
 
 <div class="success" id="successMsg">
-✅ Registration successful. Data saved.
+✅ Registration successful
 </div>
 </div>
 
-<!-- 🔥 FIREBASE (YOUR CODE + FIXED JS) -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+<!-- 🔥 FIREBASE (SAFE VERSION – NO MODULE) -->
+<script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-storage-compat.js"></script>
 
-/* FIREBASE CONFIG */
+<script>
+alert("JS LOADED"); // proof JS chal rahi
+
 const firebaseConfig = {
   apiKey: "AIzaSyCBWFoSbByYhp4iElmo01KB1NEBgaCWCbk",
   authDomain: "onecall-partner-registration.firebaseapp.com",
@@ -119,73 +99,54 @@ const firebaseConfig = {
   appId: "1:158745534242:web:6ae3edc6be64e2f4634f7b"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
+firebase.initializeApp(firebaseConfig);
 
-document.getElementById("partnerForm").addEventListener("submit", async (e) => {
-  e.preventDefault(); // ⛔ Google Form / page reload band
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-  alert("Submit clicked – JS is running"); // 🔥 CONFIRM JS RUNNING
+document.getElementById("partnerForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  alert("SUBMIT CLICKED");
 
-  try {
-    const name = document.getElementById("name").value;
-    const mobile = document.getElementById("mobile").value;
-    const city = document.getElementById("city").value;
+  const name = document.getElementById("name").value;
+  const mobile = document.getElementById("mobile").value;
+  const city = document.getElementById("city").value;
 
-    const services = [...document.querySelectorAll(".checkbox-group:nth-of-type(1) input:checked")].map(i => i.value);
-    const areas = [...document.querySelectorAll(".checkbox-group:nth-of-type(2) input:checked")].map(i => i.value);
+  const services = [...document.querySelectorAll(".checkbox-group input:checked")].map(i=>i.value);
 
-    if (!services.length || !areas.length) {
-      alert("Please select at least one service and one area");
-      return;
-    }
+  const photoFile = document.getElementById("photo").files[0];
+  const aadhaarFile = document.getElementById("aadhaar").files[0];
 
-    const photoInput = document.getElementById("photo");
-    const aadhaarInput = document.getElementById("aadhaar");
+  const photoRef = storage.ref("photos/"+Date.now()+"_"+photoFile.name);
+  const aadhaarRef = storage.ref("aadhaar/"+Date.now()+"_"+aadhaarFile.name);
 
-    if (!photoInput.files[0] || !aadhaarInput.files[0]) {
-      alert("Please select photo and Aadhaar file");
-      return;
-    }
-
-    alert("Uploading files…");
-
-    const photoRef = ref(storage, "photos/" + Date.now() + "_" + photoInput.files[0].name);
-    const aadhaarRef = ref(storage, "aadhaar/" + Date.now() + "_" + aadhaarInput.files[0].name);
-
-    await uploadBytes(photoRef, photoInput.files[0]);
-    await uploadBytes(aadhaarRef, aadhaarInput.files[0]);
-
-    const photoURL = await getDownloadURL(photoRef);
-    const aadhaarURL = await getDownloadURL(aadhaarRef);
-
-    alert("Saving data to Firestore…");
-
-    await addDoc(collection(db, "partners"), {
-      name,
-      mobile,
-      city,
-      services,
-      areas,
-      photoURL,
-      aadhaarURL,
-      createdAt: new Date()
+  photoRef.put(photoFile)
+    .then(()=>aadhaarRef.put(aadhaarFile))
+    .then(()=>Promise.all([photoRef.getDownloadURL(), aadhaarRef.getDownloadURL()]))
+    .then(urls=>{
+      return db.collection("partners").add({
+        name, mobile, city,
+        services,
+        photoURL: urls[0],
+        aadhaarURL: urls[1],
+        createdAt: new Date()
+      });
+    })
+    .then(()=>{
+      alert("DATA SAVED");
+      document.getElementById("successMsg").style.display="block";
+      e.target.reset();
+    })
+    .catch(err=>{
+      alert("ERROR: "+err.message);
+      console.error(err);
     });
-
-    alert("✅ DATA SAVED SUCCESSFULLY");
-    document.getElementById("successMsg").style.display = "block";
-    e.target.reset();
-
-  } catch (err) {
-    console.error("❌ ERROR:", err);
-    alert("ERROR: " + err.message);
-  }
 });
 </script>
 
 </body>
 </html>
+
 
 
 
